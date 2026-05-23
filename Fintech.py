@@ -9,16 +9,6 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-@st.cache_data(show_spinner="Loading data…")
-def get_data():
-    return pd.read_csv("finsight_clean.csv", parse_dates=["Date_of_Birth", "Account_Open_Date",
-                                                           "Loan_Start_Date", "Last_Login_Date",
-                                                           "KYC_Last_Updated"])
-
-df = get_data()
-df["Age_Band"] = pd.Categorical(df["Age_Band"],
-    categories=["18-24","25-34","35-44","45-54","55-64","65+"], ordered=True)
-
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(page_title="FinSight Lanka", page_icon="💰", layout="wide")
 
@@ -36,9 +26,14 @@ def pct(n, d): return 0 if d == 0 else round(100 * n / d, 1)
 # ── Data ──────────────────────────────────────────────────────────────────────
 @st.cache_data(show_spinner="Loading data…")
 def get_data():
-    return load_and_clean("data.xlsx")
+    df = pd.read_csv("finsight_clean.csv", parse_dates=["Date_of_Birth", "Account_Open_Date",
+                                                          "Loan_Start_Date", "Last_Login_Date",
+                                                          "KYC_Last_Updated"])
+    df["Age_Band"] = pd.Categorical(df["Age_Band"],
+        categories=["18-24","25-34","35-44","45-54","55-64","65+"], ordered=True)
+    return df
 
-df, _ = get_data()
+df = get_data()
 
 # ── Sidebar filters ───────────────────────────────────────────────────────────
 with st.sidebar:
@@ -118,7 +113,6 @@ with t0:
 with t1:
     st.header("Q1 — Savings & Customer Behaviour")
 
-    # Q1a
     st.subheader("Average Savings by Group")
     c1, c2, c3 = st.columns(3)
 
@@ -149,7 +143,6 @@ with t1:
 
     st.markdown("---")
 
-    # Q1b
     st.subheader("Q1b — Savings by Age Band")
     age_sav = dff.groupby("Age_Band", observed=True)["Savings_Balance"].agg(Total="sum", Mean="mean", Count="count").reset_index()
     age_sav["Age_Band"] = age_sav["Age_Band"].astype(str)
@@ -165,7 +158,6 @@ with t1:
 
     st.markdown("---")
 
-    # Q1c
     st.subheader("Q1c — Savings Flow: Growing vs Draining")
     dff["Flow"] = np.where(dff["Net_Monthly_Flow"] > 0, "Growing", "Draining")
     growing_n = (dff["Flow"] == "Growing").sum()
@@ -189,15 +181,14 @@ with t2:
     st.header("Q2 — Loan Portfolio & Risk")
 
     c = st.columns(5)
-    c[0].metric("Borrowers",      f"{len(loan_df):,}")
+    c[0].metric("Borrowers",       f"{len(loan_df):,}")
     c[1].metric("Loan Penetration",f"{pct(len(loan_df), len(dff))}%")
-    c[2].metric("Avg Loan",       f"LKR {loan_df['Loan_Amount'].mean():,.0f}")
-    c[3].metric("Total Exposure", f"LKR {loan_df['Outstanding_Loan_Balance'].sum()/1e6:.1f}M")
-    c[4].metric("Default Rate",   f"{pct((loan_valid['Loan_Repayment_Status']=='Defaulted').sum(), len(loan_valid))}%")
+    c[2].metric("Avg Loan",        f"LKR {loan_df['Loan_Amount'].mean():,.0f}")
+    c[3].metric("Total Exposure",  f"LKR {loan_df['Outstanding_Loan_Balance'].sum()/1e6:.1f}M")
+    c[4].metric("Default Rate",    f"{pct((loan_valid['Loan_Repayment_Status']=='Defaulted').sum(), len(loan_valid))}%")
 
     st.markdown("---")
 
-    # Penetration
     st.subheader("Q2a — Loan Penetration")
     c1, c2 = st.columns(2)
     with c1:
@@ -217,14 +208,13 @@ with t2:
 
     st.markdown("---")
 
-    # D:S ratio
     st.subheader("Q2b — Debt-to-Savings Ratio")
     dts = loan_df[loan_df["Debt_to_Savings"].notna()]
     exceed = dts[dts["Debt_to_Savings"] > 1.0]
     c1, c2, c3 = st.columns(3)
-    c1.metric("D:S > 1.0", f"{len(exceed):,}")
-    c2.metric("% of borrowers", f"{pct(len(exceed), len(dts))}%")
-    c3.metric("Exposure", f"LKR {exceed['Outstanding_Loan_Balance'].sum()/1e6:.1f}M")
+    c1.metric("D:S > 1.0",       f"{len(exceed):,}")
+    c2.metric("% of borrowers",  f"{pct(len(exceed), len(dts))}%")
+    c3.metric("Exposure",        f"LKR {exceed['Outstanding_Loan_Balance'].sum()/1e6:.1f}M")
 
     fig = px.histogram(dts, x="Debt_to_Savings", nbins=40, color_discrete_sequence=[BLUE],
                        title="Debt-to-Savings Distribution")
@@ -234,7 +224,6 @@ with t2:
 
     st.markdown("---")
 
-    # Defaults
     st.subheader("Q2c — Default Rates")
     c1, c2 = st.columns(2)
     with c1:
@@ -265,7 +254,6 @@ with t2:
 with t3:
     st.header("Q3 — Digital Engagement & Products")
 
-    # Q3a
     st.subheader("Q3a — App Users vs Non-App Users")
     app = dff.groupby("Mobile_App_User")["Savings_Balance"].agg(["mean","median","count"]).reset_index()
     c1, c2 = st.columns([1, 2])
@@ -283,13 +271,12 @@ with t3:
 
     st.markdown("---")
 
-    # Q3b
     st.subheader("Q3b — Cross-Sell Opportunity")
     xsell = dff[dff["CrossSell_Opportunity"]]
     c1, c2, c3 = st.columns(3)
     c1.metric("Cross-Sell Candidates", f"{len(xsell):,}")
-    c2.metric("% of Base",            f"{pct(len(xsell), len(dff))}%")
-    c3.metric("Savings Pool",         f"LKR {xsell['Savings_Balance'].sum()/1e6:.1f}M")
+    c2.metric("% of Base",             f"{pct(len(xsell), len(dff))}%")
+    c3.metric("Savings Pool",          f"LKR {xsell['Savings_Balance'].sum()/1e6:.1f}M")
 
     fig = px.bar(xsell.groupby("Customer_Segment").size().reset_index(name="Count"),
                  x="Customer_Segment", y="Count", color="Customer_Segment",
@@ -300,7 +287,6 @@ with t3:
 
     st.markdown("---")
 
-    # Q3c
     st.subheader("Q3c — Channel Quality")
     ch = dff.groupby("Acquisition_Channel")["Savings_Balance"].agg(Avg="mean", Count="count").reset_index()
     ch_def = loan_valid.groupby("Acquisition_Channel")["Loan_Repayment_Status"].apply(
@@ -317,28 +303,24 @@ with t4:
     st.header("Q4 — KPI Dashboard")
 
     kpis = [
-        ("Loan Default Rate",   pct((loan_valid["Loan_Repayment_Status"]=="Defaulted").sum(), len(loan_valid)), 5,  "lower"),
-        ("Cross-Sell Gap",      pct(dff["CrossSell_Opportunity"].sum(), len(dff)),                              35, "lower"),
-        ("App Adoption",        pct((dff["Mobile_App_User"]=="Yes").sum(), len(dff)),                           65, "higher"),
-        ("KYC Verified",        pct((dff["KYC_Status"]=="Verified").sum(), len(dff)),                           95, "higher"),
-        ("Savings Growing",     pct((dff["Net_Monthly_Flow"]>0).sum(), len(dff)),                               70, "higher"),
+        ("Loan Default Rate", pct((loan_valid["Loan_Repayment_Status"]=="Defaulted").sum(), len(loan_valid)), 5,  "lower"),
+        ("Cross-Sell Gap",    pct(dff["CrossSell_Opportunity"].sum(), len(dff)),                              35, "lower"),
+        ("App Adoption",      pct((dff["Mobile_App_User"]=="Yes").sum(), len(dff)),                           65, "higher"),
+        ("KYC Verified",      pct((dff["KYC_Status"]=="Verified").sum(), len(dff)),                           95, "higher"),
+        ("Savings Growing",   pct((dff["Net_Monthly_Flow"]>0).sum(), len(dff)),                               70, "higher"),
     ]
 
     cols = st.columns(5)
     for col, (name, val, target, direction) in zip(cols, kpis):
-        met = val <= target if direction == "lower" else val >= target
-        color = GREEN if met else RED
         col.metric(name, f"{val}%", delta=f"target {'<' if direction=='lower' else '>'}{target}%")
 
     st.markdown("---")
 
-    # Gauge summary
     fig = go.Figure()
     names   = [k[0] for k in kpis]
     values  = [k[1] for k in kpis]
     targets = [k[2] for k in kpis]
-    colors  = [GREEN if (v<=t if d=="lower" else v>=t) else RED
-               for _, v, t, d in kpis]
+    colors  = [GREEN if (v<=t if d=="lower" else v>=t) else RED for _,v,t,d in kpis]
 
     fig.add_trace(go.Bar(x=names, y=values, marker_color=colors,
                          text=[f"{v}%" for v in values], textposition="outside", name="Current"))
@@ -347,8 +329,7 @@ with t4:
                                          line=dict(width=3, color=AMBER)),
                              name="Target"))
     fig.update_layout(height=380, margin=dict(t=10,b=80),
-                      legend=dict(orientation="h", y=1.1),
-                      xaxis_tickangle=-10)
+                      legend=dict(orientation="h", y=1.1), xaxis_tickangle=-10)
     st.plotly_chart(fig, use_container_width=True)
 
 
