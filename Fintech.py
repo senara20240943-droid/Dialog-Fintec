@@ -9,7 +9,15 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
-from data_cleaning import load_and_clean
+@st.cache_data(show_spinner="Loading data…")
+def get_data():
+    return pd.read_csv("finsight_clean.csv", parse_dates=["Date_of_Birth", "Account_Open_Date",
+                                                           "Loan_Start_Date", "Last_Login_Date",
+                                                           "KYC_Last_Updated"])
+
+df = get_data()
+df["Age_Band"] = pd.Categorical(df["Age_Band"],
+    categories=["18-24","25-34","35-44","45-54","55-64","65+"], ordered=True)
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(page_title="FinSight Lanka", page_icon="💰", layout="wide")
