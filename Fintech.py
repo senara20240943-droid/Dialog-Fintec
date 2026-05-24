@@ -14,17 +14,21 @@ SEG_CLR = {"Premium": NAVY, "Regular": BLUE, "Starter": AMBER, "Unknown": "#95A5
 
 st.markdown("""
 <style>
-[data-testid="stAppViewContainer"] { background: #F0F4F8; }
-[data-testid="stSidebar"]          { background: #1B4F72; }
-[data-testid="stSidebar"] *        { color: #ECF0F1 !important; }
+[data-testid="stAppViewContainer"] { background: #0A0A0A; }
+[data-testid="stMain"]             { background: #0A0A0A; }
+[data-testid="stSidebar"]          { background: #111111; border-right: 1px solid #222; }
+[data-testid="stSidebar"] *        { color: #E0E0E0 !important; }
 [data-testid="metric-container"] {
-    background: white; border-radius: 10px;
+    background: #1A1A1A; border-radius: 10px;
     padding: 14px 18px; border-left: 4px solid #2E86C1;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 [data-testid="metric-container"] [data-testid="stMetricValue"] {
-    font-size: 1.5rem; font-weight: 700; color: #1B4F72;
+    font-size: 1.5rem; font-weight: 700; color: #2E86C1;
 }
+[data-testid="metric-container"] label { color: #AAAAAA !important; }
+p, li, span, div { color: #DDDDDD; }
+h1, h2, h3       { color: #FFFFFF !important; }
 .sh {
     background: linear-gradient(90deg,#1B4F72,#2980B9);
     color: white; border-radius: 8px;
@@ -399,10 +403,10 @@ with t4:
         status= "✅ On track" if met else "❌ Off target"
         with st.container():
             st.markdown(f"""
-            <div style="background:white;border-left:5px solid {color};border-radius:8px;
+            <div style="background:#1A1A1A;border-left:5px solid {color};border-radius:8px;
                         padding:14px 20px;margin-bottom:10px;box-shadow:0 2px 6px rgba(0,0,0,.07)">
               <small style="color:#7F8C8D">{area}</small><br>
-              <strong style="color:#1B4F72;font-size:1.05rem">{name}</strong>
+              <strong style="color:#90CAF9;font-size:1.05rem">{name}</strong>
               &nbsp;&nbsp;
               <span style="font-size:1.7rem;font-weight:800;color:{color}">{val}%</span>
               <span style="float:right;background:{color};color:white;padding:3px 12px;
@@ -447,11 +451,11 @@ with t5:
          f"Only {pct((dff['KYC_Status']=='Verified').sum(), len(dff))}% of customers are KYC-verified vs the 95% regulatory minimum. Unverified accounts restrict high-value product eligibility and expose the business to audit risk."),
     ]:
         st.markdown(f"""
-        <div style="background:white;border-radius:8px;padding:14px 18px;
+        <div style="background:#1A1A1A;border-radius:8px;padding:14px 18px;
                     margin-bottom:8px;box-shadow:0 2px 6px rgba(0,0,0,.07)">
           <span style="font-size:1.2rem">{icon}</span>
-          <strong style="color:#1B4F72"> {title}</strong><br>
-          <span style="color:#2C3E50;font-size:.9rem">{body}</span>
+          <strong style="color:#90CAF9"> {title}</strong><br>
+          <span style="color:#CCCCCC;font-size:.9rem">{body}</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -480,10 +484,10 @@ with t5:
          "Current data only has monthly averages. Granular transactions would reveal salary credit dates, spending patterns, and early distress signals (declining credits before a default) — enabling behavioural scoring and churn prediction."),
     ]:
         st.markdown(f"""
-        <div style="background:#EBF5FB;border-left:4px solid {BLUE};border-radius:6px;
+        <div style="background:#111D2B;border-left:4px solid {BLUE};border-radius:6px;
                     padding:12px 16px;margin-bottom:8px">
           <strong style="color:#1B4F72">{source}</strong><br>
-          <span style="color:#2C3E50;font-size:.9rem">{why}</span>
+          <span style="color:#CCCCCC;font-size:.9rem">{why}</span>
         </div>
         """, unsafe_allow_html=True)
 
