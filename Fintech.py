@@ -129,30 +129,34 @@ with t1:
     c1, c2, c3 = st.columns(3)
 
     with c1:
-        d = dff.groupby("Customer_Segment")["Savings_Balance"].mean().reset_index()
-        fig = px.bar(d.sort_values("Savings_Balance", ascending=False),
-                     x="Customer_Segment", y="Savings_Balance",
+        d = (dff[dff["Savings_Balance"] < 999_000_000]
+             .groupby("Customer_Segment")["Savings_Balance"].median().reset_index()
+             .sort_values("Savings_Balance", ascending=False))
+        fig = px.bar(d, x="Customer_Segment", y="Savings_Balance",
                      color="Customer_Segment", color_discrete_map=SEG_CLR,
-                     text=d.sort_values("Savings_Balance", ascending=False)["Savings_Balance"].apply(lambda v: f"{v/1e3:.0f}K"),
-                     title="By Segment")
+                     text=d["Savings_Balance"].apply(lambda v: f"{v/1e3:.0f}K"),
+                     title="By Segment (median, outlier excluded)")
         fig.update_layout(showlegend=False, height=300, margin=dict(t=40,b=0))
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
-        d = dff.groupby("Province")["Savings_Balance"].mean().reset_index().sort_values("Savings_Balance")
+        d = (dff[dff["Savings_Balance"] < 999_000_000]
+             .groupby("Province")["Savings_Balance"].median().reset_index()
+             .sort_values("Savings_Balance"))
         fig = px.bar(d, x="Savings_Balance", y="Province", orientation="h",
                      color="Savings_Balance", color_continuous_scale="Blues",
                      text=d["Savings_Balance"].apply(lambda v: f"{v/1e3:.0f}K"),
-                     title="By Province")
+                     title="By Province (median, outlier excluded)")
         fig.update_layout(height=300, margin=dict(t=40,b=0), coloraxis_showscale=False)
         st.plotly_chart(fig, use_container_width=True)
 
     with c3:
-        d = dff.groupby("Urban_Rural")["Savings_Balance"].mean().reset_index()
+        d = (dff[dff["Savings_Balance"] < 999_000_000]
+             .groupby("Urban_Rural")["Savings_Balance"].median().reset_index())
         fig = px.bar(d, x="Urban_Rural", y="Savings_Balance",
                      color="Urban_Rural", color_discrete_sequence=[NAVY, BLUE, AMBER],
                      text=d["Savings_Balance"].apply(lambda v: f"{v/1e3:.0f}K"),
-                     title="By Urban/Rural")
+                     title="By Urban/Rural (median, outlier excluded)")
         fig.update_layout(showlegend=False, height=300, margin=dict(t=40,b=0))
         st.plotly_chart(fig, use_container_width=True)
 
