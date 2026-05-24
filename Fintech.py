@@ -79,54 +79,44 @@ with t0:
     st.caption("Analytics Trainee Assessment | Dialog Finance PLC")
     st.divider()
 
-    c = st.columns(6)
-    for col, label, val in zip(c, [
-        "👥 Customers", "💰 Total Savings", "🏦 Loan Penetration",
-        "📱 App Adoption", "📈 Savings Growing", "⚠️ Default Rate"
-    ], [
-        f"{len(dff):,}",
-        f"LKR {dff['Savings_Balance'].sum()/1e6:.1f}M",
-        f"{pct((dff['Has_Loan']=='Yes').sum(), len(dff))}%",
-        f"{pct((dff['Mobile_App_User']=='Yes').sum(), len(dff))}%",
-        f"{pct((dff['Net_Monthly_Flow']>0).sum(), len(dff))}%",
-        f"{pct((loan_valid['Loan_Repayment_Status']=='Defaulted').sum(), len(loan_valid))}%",
-    ]):
-        col.metric(label, val)
+    c1, c2, c3 = st.columns(3)
+    c1.metric("👥 Customers",        f"{len(dff):,}")
+    c2.metric("💰 Total Savings",    f"LKR {dff['Savings_Balance'].sum():,.0f}")
+    c3.metric("🏦 Loan Penetration", f"{pct((dff['Has_Loan']=='Yes').sum(), len(dff))}%")
+    c4, c5, c6 = st.columns(3)
+    c4.metric("📱 App Adoption",     f"{pct((dff['Mobile_App_User']=='Yes').sum(), len(dff))}%")
+    c5.metric("📈 Savings Growing",  f"{pct((dff['Net_Monthly_Flow']>0).sum(), len(dff))}%")
+    c6.metric("⚠️ Default Rate",     f"{pct((loan_valid['Loan_Repayment_Status']=='Defaulted').sum(), len(loan_valid))}%")
 
     st.divider()
-    c1, c2, c3, c4 = st.columns(4)
 
-    with c1:
-        fig = px.pie(dff["Customer_Segment"].value_counts().reset_index(),
-                     names="Customer_Segment", values="count",
-                     color="Customer_Segment", color_discrete_map=SEG_CLR,
-                     hole=0.5, title="Segment Mix")
-        fig.update_layout(height=270, margin=dict(t=40,b=0))
-        st.plotly_chart(fig, use_container_width=True)
+    fig = px.pie(dff["Customer_Segment"].value_counts().reset_index(),
+                 names="Customer_Segment", values="count",
+                 color="Customer_Segment", color_discrete_map=SEG_CLR,
+                 hole=0.5, title="Segment Mix")
+    fig.update_layout(height=320, margin=dict(t=40,b=0))
+    st.plotly_chart(fig, use_container_width=True)
 
-    with c2:
-        d = dff["Province"].value_counts().reset_index().sort_values("count")
-        fig = px.bar(d, x="count", y="Province", orientation="h",
-                     color="count", color_continuous_scale="Blues",
-                     text="count", title="By Province")
-        fig.update_layout(height=270, margin=dict(t=40,b=0), coloraxis_showscale=False)
-        st.plotly_chart(fig, use_container_width=True)
+    d = dff["Province"].value_counts().reset_index().sort_values("count")
+    fig = px.bar(d, x="count", y="Province", orientation="h",
+                 color="count", color_continuous_scale="Blues",
+                 text="count", title="Customers by Province")
+    fig.update_layout(height=350, margin=dict(t=40,b=0), coloraxis_showscale=False)
+    st.plotly_chart(fig, use_container_width=True)
 
-    with c3:
-        fig = px.bar(dff["Acquisition_Channel"].value_counts().reset_index(),
-                     x="Acquisition_Channel", y="count", text="count",
-                     color_discrete_sequence=[BLUE], title="Acquisition Channel")
-        fig.update_layout(height=270, margin=dict(t=40,b=0), showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
+    fig = px.bar(dff["Acquisition_Channel"].value_counts().reset_index(),
+                 x="Acquisition_Channel", y="count", text="count",
+                 color_discrete_sequence=[BLUE], title="Acquisition Channel")
+    fig.update_layout(height=300, margin=dict(t=40,b=0), showlegend=False)
+    st.plotly_chart(fig, use_container_width=True)
 
-    with c4:
-        fig = px.pie(dff["KYC_Status"].value_counts().reset_index(),
-                     names="KYC_Status", values="count", hole=0.5,
-                     color="KYC_Status",
-                     color_discrete_map={"Verified":GREEN,"Expired":AMBER,"Pending":BLUE,"Unknown":"#95A5A6"},
-                     title="KYC Status")
-        fig.update_layout(height=270, margin=dict(t=40,b=0))
-        st.plotly_chart(fig, use_container_width=True)
+    fig = px.pie(dff["KYC_Status"].value_counts().reset_index(),
+                 names="KYC_Status", values="count", hole=0.5,
+                 color="KYC_Status",
+                 color_discrete_map={"Verified":GREEN,"Expired":AMBER,"Pending":BLUE,"Unknown":"#95A5A6"},
+                 title="KYC Status")
+    fig.update_layout(height=320, margin=dict(t=40,b=0))
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
