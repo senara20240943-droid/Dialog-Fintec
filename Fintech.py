@@ -471,22 +471,13 @@ with t4:
         </div>
         """, unsafe_allow_html=True)
 
-        with st.expander(f"📋 Full definition — {k['name']}"):
+        with st.expander("Full definition — " + k['name']):
             c1, c2, c3, c4 = st.columns(4)
-            c1.markdown(f"**📌 Definition**
+            c1.markdown("**Definition**\n\n" + k['defn'])
+            c2.markdown("**Formula**\n\n`" + k['formula'] + "`")
+            c3.markdown("**Why it matters**\n\n" + k['why'])
+            c4.markdown("**Target & Benchmark**\n\n" + k['bench'] + "\n\n*Current: " + str(k['val']) + "% | Gap: " + gap_txt + "*")
 
-{k['defn']}")
-            c2.markdown(f"**🧮 Formula**
-
-`{k['formula']}`")
-            c3.markdown(f"**💡 Why it matters**
-
-{k['why']}")
-            c4.markdown(f"**🎯 Target & Benchmark**
-
-{k['bench']}
-
-*Current: {k['val']}% | Gap: {gap_txt}*")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
