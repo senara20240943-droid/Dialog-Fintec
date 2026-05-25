@@ -181,6 +181,7 @@ with t1:
             "dir":     "higher",
             "why":     "Customers with positive savings flow are more financially stable and less likely to leave the bank. A lower percentage could be an early warning sign of customer stress or future churn.",
             "bench":   "The target was 70%, and the current rate is 99%, showing a very strong and healthy savings customer base.",
+        },
     ]
 
     def make_gauge_card(k):
