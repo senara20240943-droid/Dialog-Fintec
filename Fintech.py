@@ -185,6 +185,7 @@ with t1:
     ]
 
     def make_gauge_card(k):
+        import math
         val    = k["val"]
         target = k["target"]
         area   = k["area"]
@@ -192,52 +193,56 @@ with t1:
         dir_   = k["dir"]
         met    = val <= target if dir_ == "lower" else val >= target
 
-        # Colors matching screenshot exactly
-        on_color  = "#1DB954"   # bright green
-        off_color = "#E8503A"   # coral red
+        on_color  = "#22c55e"
+        off_color = "#ef4444"
         arc_color = on_color if met else off_color
-        area_color = on_color if met else off_color
         status_label = "On Track" if met else "Needs Action"
+        pill_bg   = "rgba(34,197,94,0.15)"  if met else "rgba(239,68,68,0.15)"
 
-        # Target direction label
         tgt_sign = "<" if dir_ == "lower" else ">"
         tgt_text = f"Target:  {tgt_sign} {target}%"
 
-        # SVG arc math (circumference of r=70 circle = 439.82)
-        CIRC = 439.82
-        # fill fraction: for "lower is better", full ring = target; for higher, fill = val/100
-        # Visually: fill how much of the ring is "good"
-        fill_frac = min(val / 100, 1.0)
+        # Arc from top (270°), clockwise, sweep = val% of full circle
+        # SVG: rotate(-90) so 0° is at top; stroke-dasharray on r=54 circle
+        # circumference = 2 * pi * 54 = 339.29
+        R    = 54
+        CX, CY = 70, 70
+        CIRC = round(2 * math.pi * R, 2)   # 339.29
+        fill_frac = min(val / 100.0, 1.0)
         arc_len   = round(fill_frac * CIRC, 2)
         gap_len   = round(CIRC - arc_len, 2)
+        # offset = CIRC * 0.25 so arc starts at top (12 o'clock)
+        offset = round(CIRC * 0.25, 2)
 
         card_html = f"""
-<div style="background:#1A1A1A;border-radius:16px;padding:28px 20px 24px;
-            display:flex;flex-direction:column;align-items:center;gap:0;
-            border-top:3px solid {arc_color};">
-  <span style="font-size:.7rem;font-weight:700;letter-spacing:.12em;
-               color:{area_color};margin-bottom:18px;">{area}</span>
-  <svg width="160" height="160" viewBox="0 0 160 160">
-    <circle cx="80" cy="80" r="70" fill="none" stroke="#2A2A2A" stroke-width="12"/>
-    <circle cx="80" cy="80" r="70" fill="none"
-            stroke="{arc_color}" stroke-width="12"
+<div style="background:#1c1c1c;border-radius:14px;padding:24px 16px 22px;
+            display:flex;flex-direction:column;align-items:center;">
+  <span style="font-size:.65rem;font-weight:700;letter-spacing:.14em;
+               color:{arc_color};margin-bottom:16px;text-transform:uppercase;">{area}</span>
+  <svg width="140" height="140" viewBox="0 0 140 140">
+    <circle cx="{CX}" cy="{CY}" r="{R}"
+            fill="none" stroke="#2e2e2e" stroke-width="14"/>
+    <circle cx="{CX}" cy="{CY}" r="{R}"
+            fill="none" stroke="{arc_color}" stroke-width="14"
+            stroke-linecap="round"
             stroke-dasharray="{arc_len} {gap_len}"
-            stroke-dashoffset="109.96"
-            stroke-linecap="round"/>
-    <text x="80" y="74" text-anchor="middle"
-          font-size="28" font-weight="700" fill="{arc_color}"
+            stroke-dashoffset="{offset}"
+            transform="rotate(-90 {CX} {CY})"/>
+    <text x="{CX}" y="{CY - 6}" text-anchor="middle"
+          font-size="26" font-weight="700" fill="{arc_color}"
           font-family="Arial,sans-serif">{val}%</text>
-    <text x="80" y="96" text-anchor="middle"
-          font-size="12" fill="#888888"
+    <text x="{CX}" y="{CY + 14}" text-anchor="middle"
+          font-size="11" fill="#666"
           font-family="Arial,sans-serif">current</text>
   </svg>
-  <p style="margin:14px 0 4px;font-size:1.05rem;font-weight:700;
-            color:#FFFFFF;text-align:center;">{name}</p>
-  <p style="margin:0 0 14px;font-size:.8rem;color:#666666;text-align:center;">
+  <p style="margin:14px 0 2px;font-size:1rem;font-weight:700;
+            color:#ffffff;text-align:center;line-height:1.3;">{name}</p>
+  <p style="margin:0 0 14px;font-size:.78rem;color:#555;text-align:center;">
     {tgt_text}</p>
-  <span style="display:inline-block;padding:5px 20px;border-radius:20px;
-               border:1.5px solid {arc_color};color:{arc_color};
-               font-size:.78rem;font-weight:600;letter-spacing:.04em;">
+  <span style="display:inline-block;padding:6px 22px;border-radius:999px;
+               background:{pill_bg};border:1.5px solid {arc_color};
+               color:{arc_color};font-size:.75rem;font-weight:700;
+               letter-spacing:.05em;">
     {status_label}
   </span>
 </div>
