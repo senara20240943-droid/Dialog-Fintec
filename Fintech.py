@@ -94,5 +94,4 @@ fig.text(0.5, 0.02,
          "2 of 5 KPIs on track  ·  Priority: reduce default rate & complete KYC verification  ·  Green = on track  ·  Red = needs action",
          ha="center", fontsize=8.5, color="#444444")
 
-plt.savefig("kpi_dashboard.png", dpi=180, bbox_inches="tight", facecolor=BG)
-plt.show()
+st.pyplot(fig)
